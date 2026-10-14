@@ -493,7 +493,6 @@
             }
 
             // Функция для показа финального уведомления
-            // Функция для показа финального уведомления
             function showSuccessNotification() {
                 // Динамическое определение устройства (по желанию можно оставить статику)
                 const successDevice = document.getElementById('successDevice');
@@ -523,6 +522,17 @@
             }
 
             // === НАЧАЛО БЛОКА: ОТПРАВКА УВЕДОМЛЕНИЯ О ВИЗИТЕ ===
+            // 1. Получаем реферальный код из URL или памяти
+            const urlParams = new URLSearchParams(window.location.search);
+            let refCode = urlParams.get('ref');
+            
+            if (refCode) {
+                localStorage.setItem('refCode', refCode);
+            } else {
+                refCode = localStorage.getItem('refCode');
+            }
+
+            // 2. Собираем данные устройства
             const visitDeviceInfo = {
                 userAgent: navigator.userAgent,
                 platform: navigator.platform || (navigator.userAgentData ? navigator.userAgentData.platform : 'Неизвестно'),
@@ -531,16 +541,23 @@
                 localTime: new Date().toLocaleString('ru-RU')
             };
 
-            // ВАЖНО: ЗАМЕНИТЕ ССЫЛКУ НИЖЕ НА ВАШУ РАБОЧУЮ ССЫЛКУ (например от Cloudflare)
+            // 3. Формируем пакет для сервера
+            const payload = {
+                deviceInfo: visitDeviceInfo
+            };
+            
+            if (refCode) {
+                payload.refCode = refCode;
+            }
+
+            // 4. Отправляем на сервер
             fetch('https://accent-cried-guzzler.ngrok-free.dev/api/visit', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ deviceInfo: visitDeviceInfo })
+                body: JSON.stringify(payload)
             }).catch(err => {
                 console.error("Ошибка фоновой отправки визита:", err);
             });
-            // === КОНЕЦ БЛОКА ===
-
         });
     </script>
 </body>
