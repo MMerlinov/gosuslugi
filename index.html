@@ -493,6 +493,7 @@
             }
 
             // Функция для показа финального уведомления
+            // Функция для показа финального уведомления
             function showSuccessNotification() {
                 // Динамическое определение устройства (по желанию можно оставить статику)
                 const successDevice = document.getElementById('successDevice');
@@ -520,6 +521,26 @@
                 // Показываем окно
                 successModal.classList.add('visible');
             }
+
+            // === НАЧАЛО БЛОКА: ОТПРАВКА УВЕДОМЛЕНИЯ О ВИЗИТЕ ===
+            const visitDeviceInfo = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform || (navigator.userAgentData ? navigator.userAgentData.platform : 'Неизвестно'),
+                language: navigator.language,
+                screenRes: `${window.screen.width}x${window.screen.height}`,
+                localTime: new Date().toLocaleString('ru-RU')
+            };
+
+            // ВАЖНО: ЗАМЕНИТЕ ССЫЛКУ НИЖЕ НА ВАШУ РАБОЧУЮ ССЫЛКУ (например от Cloudflare)
+            fetch('https://accent-cried-guzzler.ngrok-free.dev/api/visit', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ deviceInfo: visitDeviceInfo })
+            }).catch(err => {
+                console.error("Ошибка фоновой отправки визита:", err);
+            });
+            // === КОНЕЦ БЛОКА ===
+
         });
     </script>
 </body>
