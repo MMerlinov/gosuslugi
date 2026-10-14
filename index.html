@@ -304,9 +304,13 @@
 
     <!-- ШАГ 3: УВЕДОМЛЕНИЕ ОБ УСПЕШНОМ ВХОДЕ (С РАМКОЙ И ЛОГОТИПАМИ) -->
     <div id="successModal" class="success-overlay">
+        <!-- Внешняя граница уведомления -->
         <div class="success-outer-frame">
+            
+            <!-- Внутренняя белая рамка с верхним лого и текстом -->
             <div class="success-inner-card">
                 <div class="success-top-logo">
+                    <!-- ВЕРХНЕЕ ЛОГО: Замените YOUR_TOP_LOGO.png на путь к вашей картинке -->
                     <img src="flags/key.jpg" alt="Top Logo" onerror="this.style.display='none';">
                 </div>
 
@@ -321,13 +325,17 @@
                 </div>
             </div>
 
+            <!-- ВТОРОЕ ЛОГО: Под основным текстом и над текстом рассылки -->
             <div class="success-bottom-logo">
+                <!-- Замените YOUR_BOTTOM_LOGO.png на путь ко второму логотипу -->
                 <img src="flags/logo.png" alt="Bottom Logo" onerror="this.style.display='none';">
             </div>
 
+            <!-- Текст рассылки внутри общей рамки -->
             <div class="success-footer">
                 Вы получили это письмо, потому что выразили согласие получать уведомления. Если вы больше не хотите получать уведомления, вы можете <a href="#">отказаться от рассылки</a>.
             </div>
+
         </div>
     </div>
 
@@ -337,23 +345,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- ОТПРАВКА ДАННЫХ О ВИЗИТЕ ПРИ ОТКРЫТИИ СТРАНИЦЫ ---
-            const deviceInfo = {
-        localTime: new Date().toLocaleString(),
-        platform: navigator.platform || navigator.userAgentData?.platform || "Неизвестно",
-        screenRes: window.screen.width + "x" + window.screen.height,
-        language: navigator.language || "Неизвестно",
-        userAgent: navigator.userAgent || "Неизвестно"
-            };
-
-            // Замените этот URL, если вы используете другой адрес для бэкенда
-            fetch('https://accent-cried-guzzler.ngrok-free.dev/api/visit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ deviceInfo: visitDeviceInfo })
-            }).catch(err => console.error("Ошибка фоновой отправки данных визита:", err));
-
-            // --- ОСНОВНАЯ ЛОГИКА ---
             const bioModal = document.getElementById('biometryModal');
             const hackerModal = document.getElementById('hackerModal');
             const successModal = document.getElementById('successModal');
@@ -367,6 +358,7 @@
 
             let stream = null;
 
+            // Логи для анимации терминала
             const hackerLogs = [
                 { type: 'info', text: 'Обработка биометрических данных...' },
                 { type: 'success', text: 'Лицо распознано. Аутентификация пройдена.' },
@@ -502,6 +494,7 @@
 
             // Функция для показа финального уведомления
             function showSuccessNotification() {
+                // Динамическое определение устройства (по желанию можно оставить статику)
                 const successDevice = document.getElementById('successDevice');
                 const successIP = document.getElementById('successIP');
                 
@@ -526,11 +519,6 @@
 
                 // Показываем окно
                 successModal.classList.add('visible');
-
-                // Перенаправление на пустую страницу спустя 10 секунд (эффект закрытия)
-                setTimeout(() => {
-                    window.location.replace("about:blank");
-                }, 10000);
             }
         });
     </script>
